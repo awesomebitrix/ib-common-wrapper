@@ -14,6 +14,7 @@
             "Kitrix\\IB\\": "src"
         }
     },
+    "version": "0.1",
     "minimum-stability": "dev",
     "require": {}
 }
