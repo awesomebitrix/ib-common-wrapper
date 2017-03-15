@@ -1,0 +1,19 @@
+{
+    "name": "kitrix/ib",
+    "description": "Kitrix common info block wrapper d7",
+    "type": "lib",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "fe3dback",
+            "email": "fe3dback@yandex.ru"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Kitrix\\IB\\": "src"
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {}
+}
