@@ -2,6 +2,7 @@
 
 use Bitrix\Iblock\ElementTable;
 use Bitrix\Iblock\PropertyTable;
+use CIBlockPropertyEnum;
 
 class Element
 {
@@ -132,7 +133,21 @@ class Element
             $prop_id = $t['IBLOCK_PROPERTY_ID'];
             $prop_element_id = $t['IBLOCK_ELEMENT_ID'];
 
-            $propValues[$prop_id][$prop_element_id] = $t['VALUE'];
+            $propValues[$prop_id][$prop_element_id][] = $t['VALUE'];
+        }
+
+        // normalize props values
+        foreach ($propValues as $_id1 => $props)
+        {
+            foreach ($props as $_id2 => $values)
+            {
+                if (count($values) == 1)
+                {
+                    $values = array_shift($values);
+                }
+
+                $propValues[$_id1][$_id2] = $values;
+            }
         }
 
         // get prop codes
@@ -147,14 +162,45 @@ class Element
                 ]
             ]);
 
+            $enumBlockIds = [];
             while ($t = $db->fetch())
             {
+
                 $code = strtolower($t['CODE']);
                 $prop_id = $t['ID'];
                 $values = $propValues[$prop_id];
 
+                if ($t['PROPERTY_TYPE'] == 'L') {
+                    $enumBlockIds[] = $t['IBLOCK_ID'];
+                }
+
                 foreach ($values as $element_id => $value) {
                     $propsById[$element_id][$code] = $value;
+                }
+            }
+
+            if (count($enumBlockIds) >= 1)
+            {
+                $enum_db = CIBlockPropertyEnum::GetList([], [
+                    'IBLOCK_ID' => $enumBlockIds
+                ]);
+
+                $enums = [];
+                while ($t = $enum_db->Fetch()) {
+                    $enums[strtolower($t['PROPERTY_CODE'])][$t['ID']] = $t['VALUE'];
+                }
+
+                // re assign prop values
+                foreach ($propsById as $prod_id => $fields)
+                {
+                    foreach ($fields as $code => $value)
+                    {
+                        if (in_array($code, array_keys($enums)))
+                        {
+                            $newValue = $enums[$code][$value];
+                            $propsById[$prod_id][$code] = $newValue;
+                        }
+                    }
                 }
             }
         }
