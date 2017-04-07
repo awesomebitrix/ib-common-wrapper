@@ -33,7 +33,14 @@ class Element
     public static function getList(string $tableCode = "", array $parameters = [], bool $loadProps = false)
     {
         // Global filter
-        $parameters['filter'] = self::getGlobalFilter($tableCode) + (array)$parameters['filter'];
+        $filter = array_merge(self::getGlobalFilter($tableCode), (array)$parameters['filter']);
+        $parameters['filter'] = [];
+
+        foreach ($filter as $key => $val) {
+            if (!is_null($val)) {
+                $parameters['filter'][$key] = $val;
+            }
+        }
 
         // fetch
         $db = ElementTable::getList($parameters);
